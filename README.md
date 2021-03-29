@@ -1,6 +1,12 @@
-# ui
+# draggable-example
 
-> Ai-tools ui
+> Example usage of [vue.draggable](https://github.com/SortableJS/Vue.Draggable)
+
+![demo gif](example.gif)
+
+## Live demo
+
+https://david-desmaisons.github.io/draggable-example/
 
 ## Build Setup
 
@@ -9,13 +15,9 @@
 npm install
 
 # serve with hot reload at localhost:8080
-npm run dev
+npm run serve
 
 # build for production with minification
 npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
 ```
 
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
