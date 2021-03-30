@@ -5,6 +5,7 @@
 ``` 
 [
   {
+    "id": "node:1",
     "ip": "ip1",
     "name": "主中心-redis-node1"
   },
@@ -13,12 +14,18 @@
     "name": "主中心-redis-node1"
   }
 ]
+
+POST 
+{"data":{
+    "ip": "ip5",
+    "name": "主-redis-5"
+}}
 ```
 * 混沌实验列表 /api/kv/chaos/blade
 ``` 
 [
   {
-    "id": "network-loss",
+    "id": "blade:1",
     "name": "网络丢包",
     "cmd": "blade create network loss",
     "params": [
@@ -67,6 +74,16 @@
     ]
   }
 ]
+
+```
+
+* CRUD
+``` 
+[GIN-debug] POST   /api/kv/:b/:k             --> github.com/yusys-cloud/ai-tools/server.(*Server).create-fm (3 handlers)
+[GIN-debug] GET    /api/kv/:b/:k             --> github.com/yusys-cloud/ai-tools/server.(*Server).readAll-fm (3 handlers)
+[GIN-debug] GET    /api/kv/:b/:k/:kid        --> github.com/yusys-cloud/ai-tools/server.(*Server).readOne-fm (3 handlers)
+[GIN-debug] PUT    /api/kv/:b/:k/:kid        --> github.com/yusys-cloud/ai-tools/server.(*Server).update-fm (3 handlers)
+[GIN-debug] DELETE /api/kv/:b/:k/:kid        --> github.com/yusys-cloud/ai-tools/server.(*Server).delete-fm (3 handlers)    
 
 ```
 
