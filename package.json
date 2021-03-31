@@ -1,34 +1,30 @@
 {
-  "name": "draggable-example",
+  "name": "api-tool",
   "version": "0.1.0",
   "private": true,
-  "description": "A Vue.js project",
-  "author": "desmaisons_david <desmaisons_david@hotmail.com>",
-  "license": "MIT",
   "scripts": {
-    "serve": "vue-cli-service serve --open",
-    "build": "vue-cli-service build --dest docs --mode dev --modern",
-    "lint": "vue-cli-service lint",
-    "test:unit": "vue-cli-service test:unit"
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "bootstrap": "^3.3.7",
-    "font-awesome": "^4.7.0",
-    "vue": "^2.5.17",
-    "vuedraggable": "^2.23.1"
+    "axios": "^0.21.1",
+    "core-js": "^3.6.5",
+    "element-ui": "^2.4.5",
+    "qs": "^6.10.1",
+    "vue": "^2.6.11",
+    "vuedraggable": "^2.24.3"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.0.0",
-    "@vue/cli-plugin-eslint": "^3.0.0",
-    "@vue/cli-plugin-unit-jest": "^3.0.0",
-    "@vue/cli-service": "^3.0.0",
-    "@vue/eslint-config-prettier": "^3.0.0",
-    "@vue/test-utils": "^1.0.0-beta.20",
-    "babel-core": "7.0.0-bridge.0",
-    "babel-jest": "^23.0.1",
-    "less": "^3.0.4",
-    "less-loader": "^4.1.0",
-    "vue-template-compiler": "^2.5.17"
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "babel-eslint": "^10.1.0",
+    "babel-plugin-component": "^1.1.1",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^6.2.2",
+    "vue-cli-plugin-element": "~1.0.1",
+    "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
     "root": true,
@@ -37,44 +33,16 @@
     },
     "extends": [
       "plugin:vue/essential",
-      "@vue/prettier"
+      "eslint:recommended"
     ],
-    "rules": {},
     "parserOptions": {
       "parser": "babel-eslint"
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
+    },
+    "rules": {}
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
-    "not ie <= 8"
-  ],
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "jsx",
-      "json",
-      "vue"
-    ],
-    "transform": {
-      "^.+\\.vue$": "vue-jest",
-      ".+\\.(css|styl|less|sass|scss|png|jpg|ttf|woff|woff2)$": "jest-transform-stub",
-      "^.+\\.jsx?$": "babel-jest"
-    },
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "snapshotSerializers": [
-      "jest-serializer-vue"
-    ],
-    "testMatch": [
-      "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)"
-    ],
-    "testURL": "http://localhost/"
-  }
+    "not dead"
+  ]
 }
