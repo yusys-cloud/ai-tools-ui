@@ -1,5 +1,3 @@
 module.exports = {
-  baseUrl: "./",
-  publicPath: 'ai-tools-ui'
-};
-
+    publicPath: 'ai-tools-ui'
+}
