@@ -9,6 +9,7 @@ import Utils from '@/util/util.js'
 Vue.config.productionTip = false;
 Vue.prototype.$message = Message;
 Vue.prototype.$confirm = MessageBox;
+axios.defaults.baseURL="http://localhost:9999"
 
 // 添加请求拦截器.
 axios.interceptors.request.use((request) => {

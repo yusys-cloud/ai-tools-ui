@@ -4,13 +4,15 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>主机资源</span>
-          <el-button size="mini" @click="hostForm.visible = true" style="float: right">添加</el-button>
+          <el-button size="mini" @click="addHost" style="float: right">添加</el-button>
         </div>
         <el-row style="margin-top: 5px">
           <draggable class="dragArea list-group" v-model="hostList" v-bind="dragOptions" :sort="false" :group="{ name: 'chaos', pull: 'clone', put: false }" :clone="cloneHost">
             <transition-group>
               <div class="list-group-item host-item" v-for="element in hostList" :key="element.ip" :title="element.ip">
                 {{ element.name }}
+                <i class="el-icon-edit" @click="editHost(element)"></i>
+                <i class="el-icon-delete" @click="deleteHost(element)"></i>
               </div>
             </transition-group>
           </draggable>
@@ -147,6 +149,7 @@ export default {
       hostList: [],
       hostForm: {
         visible: false,
+        type: "add",
         data: {},
         rules: {
           name: [{ required: true, message: "请输入主机名称" }],
@@ -223,6 +226,16 @@ export default {
         _this.hostList = _this.$util.arrayKv(res, "id");
       });
     },
+    addHost: function () {
+      this.hostForm.type = "add";
+      this.hostForm.visible = true;
+    },
+    editHost: function (item) {
+      var _this = this;
+      _this.hostForm.data = _this.$util.deepClone(item);
+      this.hostForm.type = "edit";
+      this.hostForm.visible = true;
+    },
     saveHost: function () {
       // 校验
       var _this = this;
@@ -237,17 +250,26 @@ export default {
     },
     sendSaveRequest: function () {
       var _this = this;
-      _this.openFullScreenLoading();
-      _this.$axios
-        .post("/api/kv/chaos/node", _this.hostForm.data)
-        .then((res) => {
-          _this.$message("保存成功:" + res);
+      var data = _this.hostForm.data;
+      _this.saveFn(
+        "/api/kv/chaos/node",
+        data.id,
+        _this.hostForm.type,
+        data,
+        "保存主机成功!",
+        () => {
           _this.hostForm.visible = false;
-          _this.hostList.push(this.$util.deepClone(this.hostForm.data));
-        })
-        .finally(() => {
-          _this.closeFullScreenLoading();
-        });
+          _this.queryHostList();
+        }
+      );
+    },
+    deleteHost: function (item) {
+      var _this = this;
+      _this.deleteFn(
+        "此操作将删除该主机,是否继续?",
+        "/api/kv/chaos/node/" + item.id,
+        _this.queryHostList
+      );
     },
     /**
      * 复制主机到演练场景.
@@ -286,31 +308,22 @@ export default {
     },
     saveBlade: function () {
       var _this = this;
-      _this.openFullScreenLoading();
-      var method = "post";
-      var url = "/api/kv/chaos/blade";
-      if (this.bladeForm.type != "add") {
-        method = "put";
-        url = "/api/kv/chaos/blade/" + _this.bladeForm.data.id;
-      }
-      _this
-        .$axios({
-          method: method,
-          url: url,
-          data: _this.bladeForm.data,
-        })
-        .then(() => {
-          _this.$message("保存基础实验成功!");
+      var data = _this.bladeForm.data;
+      _this.saveFn(
+        "/api/kv/chaos/blade",
+        data.id,
+        _this.bladeForm.type,
+        data,
+        "保存基础实验成功!",
+        () => {
           _this.bladeForm.visible = false;
-          _this.queryBlades;
-        })
-        .finally(() => {
-          _this.closeFullScreenLoading();
-        });
+          _this.queryBlades();
+        }
+      );
     },
     addBlade: function () {
       var _this = this;
-      _this.bladeForm.type = '"edit';
+      _this.bladeForm.type = "add";
       _this.bladeForm.visible = true;
     },
     /**
@@ -324,22 +337,51 @@ export default {
     },
     deleteBlade: function (item) {
       var _this = this;
-      this.$confirm("此操作将永久删除该基础场景, 是否继续?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
+      _this.deleteFn(
+        "此操作将永久删除该基础场景, 是否继续?",
+        "/api/kv/chaos/blade/" + item.id,
+        _this.queryBlades
+      );
+    },
+    saveFn: function (postUrl, id, type, data, msg, successFunction) {
+      var _this = this;
+      _this.openFullScreenLoading();
+      var method = "post";
+      var url = postUrl;
+      if (type != "add") {
+        method = "put";
+        url = postUrl + "/" + id;
+      }
+      _this
+        .$axios({
+          method: method,
+          url: url,
+          data: data,
+        })
         .then(() => {
-          _this.$axios
-            .delete("/api/kv/chaos/blade/" + item.id)
-            .then(() => {
-              _this.$message({
-                type: "success",
-                message: "删除成功!",
-              });
-              _this.queryBlades();
-            })
-            .finally(() => {});
+          _this.$message(msg);
+          successFunction();
+        })
+        .finally(() => {
+          _this.closeFullScreenLoading();
+        });
+    },
+    deleteFn: function (msg, url, queryFunction) {
+      var _this = this;
+      _this
+        .$confirm(msg, "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+        .then(() => {
+          _this.$axios.delete(url).then(() => {
+            _this.$message({
+              type: "success",
+              message: "删除成功!",
+            });
+            queryFunction();
+          });
         })
         .catch(() => {
           _this.$message({
