@@ -5,6 +5,10 @@ jobs:
     runs-on: ubuntu-latest
     name: Build Vue
     steps:
+    - name: Install npm dependencies
+      run: npm install
+    - name: Run build task
+      run: npm run build
     - uses: actions/checkout@v2
     - id: Build-Vue
       uses: xRealNeon/VuePagesAction@1.0.0
