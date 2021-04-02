@@ -21,6 +21,7 @@
     "id": "blade:1",
     "name": "网络丢包",
     "cmd": "blade create network loss",
+    "runResult": "",
     "params": [
       {
         "id": "--percent",
