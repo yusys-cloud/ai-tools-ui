@@ -1,14 +1,26 @@
-import Vue from 'vue'
+import Vue from 'vue';
 import {
-  Button, Row, Col, Card,
+  Button,
+  Row,
+  Col,
+  Card,
   Progress,
-  Drawer, Dialog,
-  Form, FormItem,
-  Input, Autocomplete,
-  Table, TableColumn, Pagination,
-  Collapse, CollapseItem,
-  Loading, Tooltip, Tag,InfiniteScroll
-} from 'element-ui'
+  Drawer,
+  Dialog,
+  Form,
+  FormItem,
+  Input,
+  Autocomplete,
+  Table,
+  TableColumn,
+  Pagination,
+  Collapse,
+  CollapseItem,
+  Loading,
+  Tooltip,
+  Tag,
+  InfiniteScroll
+} from 'element-ui';
 
 Vue.use(Button)
   .use(Row)

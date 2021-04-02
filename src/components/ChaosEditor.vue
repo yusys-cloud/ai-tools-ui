@@ -4,15 +4,15 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>主机资源</span>
-          <el-button size="mini" @click="addHost" style="float: right">添加</el-button>
+          <el-button size="mini" style="float: right" @click="addHost">添加</el-button>
         </div>
         <el-row style="margin-top: 5px">
-          <draggable class="dragArea list-group" v-model="hostList" v-bind="dragOptions" :sort="false" :group="{ name: 'chaos', pull: 'clone', put: false }" :clone="cloneHost">
+          <draggable v-model="hostList" class="dragArea list-group" v-bind="dragOptions" :sort="false" :group="{ name: 'chaos', pull: 'clone', put: false }" :clone="cloneHost">
             <transition-group>
-              <div class="list-group-item host-item" v-for="element in hostList" :key="element.ip" :title="element.ip">
+              <div v-for="element in hostList" :key="element.ip" class="list-group-item host-item" :title="element.ip">
                 {{ element.name }}
-                <i class="el-icon-edit" @click="editHost(element)"></i>
-                <i class="el-icon-delete" @click="deleteHost(element)"></i>
+                <i class="el-icon-edit" @click="editHost(element)" />
+                <i class="el-icon-delete" @click="deleteHost(element)" />
               </div>
             </transition-group>
           </draggable>
@@ -23,21 +23,21 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>演练场景</span>
-          <el-button size="small" @click="showChaosForm" style="float: right">保存实验</el-button>
+          <el-button size="small" style="float: right" @click="showChaosForm">保存实验</el-button>
         </div>
         <el-col :span="10">
-          <draggable class="list-group dragArea" v-model="chaosList" v-bind="dragOptions" @add="chaosAdded" :move="checkBladeMove">
+          <draggable v-model="chaosList" class="list-group dragArea" v-bind="dragOptions" :move="checkBladeMove" @add="chaosAdded">
             <transition-group>
               <div v-for="(item, index) in chaosList" :key="item.name + index">
-                <div class="host-item list-group-item" style="margin-top: 12px" v-if="item.type == 'host'">
+                <div v-if="item.type == 'host'" class="host-item list-group-item" style="margin-top: 12px">
                   <span>{{ item.name }} {{ item.ip }}</span>
-                  <i class="el-icon-close" v-if="!item.virtual" @click="deleteChaos(item)"></i>
+                  <i v-if="!item.virtual" class="el-icon-close" @click="deleteChaos(item)" />
                 </div>
-                <div class="blade-item list-group-item" v-else @click="showParam(item)">
+                <div v-else class="blade-item list-group-item" @click="showParam(item)">
                   <el-tooltip content="单击配置实验参数" placement="left" effect="light">
                     <span>{{ item.name }} {{ item.cmd }}</span>
                   </el-tooltip>
-                  <i class="el-icon-close" v-if="!item.virtual" @click="deleteChaos(item)"></i>
+                  <i v-if="!item.virtual" class="el-icon-close" @click="deleteChaos(item)" />
                 </div>
               </div>
             </transition-group>
@@ -45,13 +45,14 @@
         </el-col>
         <!-- 某个场景的配置参数 -->
         <el-col :span="14">
-          <el-form :model="chaosParam" class="param-panel" size="small">
+          <p class="param-title" :class="{ 'exist-param': chaosParamsConfig.length>0}" :title="expDesc">{{ expDesc }}</p>
+          <el-form v-if="chaosParamsConfig.length>0" class="dragArea param-panel" :model="chaosParam" size="small" label-position="left">
             <el-form-item v-for="(item, index) in chaosParamsConfig" :key="index" :label="item.name">
               <span slot="label">
                 <div class="param-label">{{ item.name }}</div>
                 <p class="param-desc">{{ item.desc }}</p>
               </span>
-              <el-input v-model="chaosParam[item.id]" :placeholder="item.label" clearable></el-input>
+              <el-input v-model="chaosParam[item.id]" :placeholder="item.label" clearable />
             </el-form-item>
           </el-form>
         </el-col>
@@ -61,47 +62,50 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>基础演练场景</span>
-          <el-button size="mini" @click="addBlade" style="float: right">添加</el-button>
+          <el-button size="mini" style="float: right" @click="addBlade">添加</el-button>
         </div>
-        <draggable class="list-group dragArea" v-model="bladeList" v-bind="dragOptions" :sort="false" :group="{ name: 'chaos', pull: 'clone', put: false }" :clone="cloneBlade" :move="checkBladeMove">
+        <draggable v-model="bladeList" class="list-group dragArea" v-bind="dragOptions" :sort="false" :group="{ name: 'chaos', pull: 'clone', put: false }" :clone="cloneBlade" :move="checkBladeMove">
           <transition-group type="transition" name="flip-list">
-            <div class="list-group-item  blade-item" v-for="element in bladeList" :key="element.id">
-              {{ element.name }}<i class="el-icon-edit" @click="editBlade(element)"></i>
-              <i class="el-icon-delete" @click="deleteBlade(element)"></i>
+            <div v-for="element in bladeList" :key="element.id" class="list-group-item  blade-item">
+              {{ element.name }}<i class="el-icon-edit" @click="editBlade(element)" />
+              <i class="el-icon-delete" @click="deleteBlade(element)" />
             </div>
           </transition-group>
         </draggable>
       </el-card>
     </el-col>
-    <el-drawer :withHeader="false" :visible.sync="bladeForm.visible" direction="rtl" size="45%" :modal-append-to-body="false">
+    <el-drawer :with-header="false" :visible.sync="bladeForm.visible" direction="rtl" size="45%" :wrapper-closable="false" :modal-append-to-body="false">
       <el-form :model="bladeForm.data" :rules="bladeForm.rules" label-width="120px" size="small" width="90%" style="margin-top:30px">
         <el-form-item label="混沌测试名称" prop="name">
-          <el-input v-model="bladeForm.data.name" autocomplete="off" clearable></el-input>
+          <el-input v-model="bladeForm.data.name" autocomplete="off" clearable />
+        </el-form-item>
+        <el-form-item label="混沌测试描述" prop="desc">
+          <el-input v-model="bladeForm.data.desc" clearable />
         </el-form-item>
         <el-form-item label="混沌测试命令" prop="cmd">
-          <el-input v-model="bladeForm.data.cmd" autocomplete="off" clearable></el-input>
+          <el-input v-model="bladeForm.data.cmd" autocomplete="off" clearable />
         </el-form-item>
-        <el-form-item class="param-config" label-width="0" v-for="(item, index) in bladeForm.data.params" :key="index">
-          <el-input class="param-item" style="width: 27%;" v-model="item.name" placeholder="参数中文名" autocomplete="off" clearable></el-input>
-          <el-input class="param-item" style="width: 27%;" v-model="item.id" placeholder="参数英文" clearable></el-input>
-          <el-input class="param-item" style="width: 27%;" v-model="item.label" placeholder="参数推荐值"></el-input>
+        <el-form-item v-for="(item, index) in bladeForm.data.params" :key="index" class="param-config" label-width="0">
+          <el-input v-model="item.name" class="param-item" style="width: 27%;" placeholder="参数中文名" autocomplete="off" clearable />
+          <el-input v-model="item.id" class="param-item" style="width: 27%;" placeholder="参数英文" clearable />
+          <el-input v-model="item.label" class="param-item" style="width: 27%;" placeholder="参数推荐值" />
           <el-button class="param-item" style="width: 12%;" size="small" icon="el-icon-delete" @click.prevent="removeParam(index,item)">删除</el-button>
-          <el-input type="textarea" class="param-item" style="width: 95%;" :rows="1" v-model="item.desc" placeholder="参数描述" clearable></el-input>
+          <el-input v-model="item.desc" type="textarea" :rows="1" class="param-item" style="width: 94%;margin-left:0.5%;" placeholder="参数描述" clearable :autosize="true" />
         </el-form-item>
       </el-form>
-      <div>
-        <el-button @click="addParam" size="small" icon="el-icon-plus">添加配置参数</el-button>
-        <el-button @click="bladeForm.visible=false" size="small">取消</el-button>
-        <el-button type="primary" @click="saveBlade" size="small">保存</el-button>
+      <div style="margin-bottom: 20px">
+        <el-button size="small" icon="el-icon-plus" @click="addParam">添加配置参数</el-button>
+        <el-button size="small" @click="bladeForm.visible=false">取消</el-button>
+        <el-button type="primary" size="small" @click="saveBlade">保存</el-button>
       </div>
     </el-drawer>
-    <el-drawer title="添加主机" :visible.sync="hostForm.visible" direction="ltr" size="20%" :modal-append-to-body="false">
-      <el-form class="chaosForm" ref="hostForm" :model="hostForm.data" :rules="hostForm.rules" label-width="80px" size="small" width="100px">
+    <el-drawer title="添加主机" :visible.sync="hostForm.visible" direction="ltr" size="20%" :wrapper-closable="false" :modal-append-to-body="false">
+      <el-form ref="hostForm" class="chaosForm" :model="hostForm.data" :rules="hostForm.rules" label-width="80px" size="small" width="100px">
         <el-form-item label="主机名称" prop="name">
-          <el-input v-model="hostForm.data.name" autocomplete="off" clearable></el-input>
+          <el-input v-model="hostForm.data.name" autocomplete="off" clearable />
         </el-form-item>
         <el-form-item label="主机IP" prop="ip">
-          <el-input v-model="hostForm.data.ip" autocomplete="off" clearable></el-input>
+          <el-input v-model="hostForm.data.ip" autocomplete="off" clearable />
         </el-form-item>
       </el-form>
       <div>
@@ -112,10 +116,10 @@
     <el-dialog title="保存实验" :visible.sync="basicChaosForm.visible" :modal-append-to-body="false">
       <el-form ref="basicChaosForm" :model="basicChaosForm.data" :rules="basicChaosForm.rules" label-width="80px" size="small" width="100px">
         <el-form-item label="实验名称" prop="name">
-          <el-input v-model="basicChaosForm.data.name" autocomplete="off" clearable></el-input>
+          <el-input v-model="basicChaosForm.data.name" autocomplete="off" clearable />
         </el-form-item>
         <el-form-item label="实验描述" prop="desc">
-          <el-input v-model="basicChaosForm.data.desc" type="textarea" autocomplete="off" placeholder="请输入内容" :rows="2" clearable></el-input>
+          <el-input v-model="basicChaosForm.data.desc" type="textarea" autocomplete="off" placeholder="请输入内容" :rows="2" clearable />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -129,88 +133,155 @@
 </template>
 
 <script>
-import draggable from "vuedraggable";
+import draggable from 'vuedraggable';
 var chaosIndex = 0;
 export default {
-  name: "chaosEditor",
+  name: 'ChaosEditor',
   components: {
-    draggable,
+    draggable
+  },
+  props: {
+    // 一个编排好的实验数据.
+    chaosData: { type: Object, default: null },
+    type: { type: String, default: 'add' },
+    // eslint-disable-next-line vue/require-default-prop
+    afterSaveChaos: Function
   },
   data: function () {
     return {
       dragOptions: {
         animation: 0,
-        group: "chaos",
+        group: 'chaos',
         disabled: false,
-        ghostClass: "ghost",
-        scroll: true,
+        ghostClass: 'ghost',
+        scroll: true
       },
       // 显示的主机列表.
       hostList: [],
       hostForm: {
         visible: false,
-        type: "add",
+        type: 'add',
         data: {},
         rules: {
-          name: [{ required: true, message: "请输入主机名称" }],
-          ip: [{ required: true, message: "请输入主机IP" }],
-        },
+          name: [{ required: true, message: '请输入主机名称' }],
+          ip: [{ required: true, message: '请输入主机IP' }]
+        }
       },
       // 混沌实验基础场景.
       bladeList: [],
       bladeForm: {
         visible: false,
-        type: "add",
+        type: 'add',
         data: { params: [] },
         rules: {
-          name: [{ required: true, message: "请输入主机名称" }],
-          cmd: [{ required: true, message: "请输入命令" }],
-        },
+          name: [{ required: true, message: '请输入实验名称' }],
+          cmd: [{ required: true, message: '请输入命令' }]
+        }
       },
       // 是否显示主机没有添加的提示消息.
       bladeDragNotiMessage: true,
-      notiMessage: "",
-      // 编排的实验场景.
-      chaosList: [
-        { id: "0", type: "host", name: "拖拽主机到这里", virtual: true },
-      ],
+      notiMessage: '',
       // 放置当前场景的配置值.
       chaosParam: {},
-      // 放置不同场景的配置值.
       chaosParams: {},
+      chaosList: [
+        { id: '0', type: 'host', name: '拖拽主机到这里', virtual: true }
+      ],
+      // 放置不同场景的配置值.
       // 用于动态渲染面板.
       chaosParamsConfig: [],
+      expDesc: '实验描述',
       basicChaosForm: {
         visible: false,
         data: {},
         rules: {
           name: [
-            { required: true, message: "请输入实验名称", trigger: "blur" },
+            { required: true, message: '请输入实验名称', trigger: 'blur' }
           ],
-          desc: [
-            { required: true, message: "请输入实验描述", trigger: "blur" },
-          ],
-        },
+          desc: [{ required: true, message: '请输入实验描述', trigger: 'blur' }]
+        }
       },
       // 编排的实验数据.
-      chaosRecord: {},
+      chaosRecord: {}
     };
   },
+  watch: {
+    chaosData: function (value) {
+      this.initChaos(value);
+    }
+  },
   created: function () {
-    this.queryHostList();
-    this.queryBlades();
+    var _this = this;
+    _this.queryHostList();
+    _this.queryBlades();
+    _this.initChaos(_this.chaosData);
   },
   methods: {
+    initChaos: function (data) {
+      var _this = this;
+      if (data) {
+        var basicParam = {};
+        for (const key in data) {
+          if (Object.hasOwnProperty.call(data, key)) {
+            const element = data[key];
+            if (element) {
+              if (key == 'chaos') {
+                var len = element.length;
+                _this.chaosList.splice(0);
+                _this.chaosParams = {};
+                var count = 0;
+                for (let index = 0; index < len; index++) {
+                  const nodeChaos = element[index];
+                  count++;
+                  nodeChaos;
+                  // 放入主机节点.
+                  _this.chaosList.push({
+                    id: count,
+                    index: count,
+                    type: 'host',
+                    name: nodeChaos.node.name,
+                    ip: nodeChaos.node.ip
+                  });
+                  // 放入实验节点.
+                  const blades = nodeChaos.blades;
+                  blades.forEach((blade) => {
+                    count++;
+                    _this.chaosList.push({
+                      id: blade.id,
+                      index: count,
+                      name: blade.name,
+                      desc: blade.desc,
+                      label: blade.label,
+                      params: blade.params
+                    });
+                    // 放入实验参数.
+                    const params = blade.params;
+                    _this.chaosParams[index] = {};
+                    params.forEach((p) => {
+                      _this.chaosParams[index][p.id] = p.value;
+                    });
+                  });
+                }
+                chaosIndex = count;
+              } else {
+                basicParam[key] = element;
+              }
+            }
+          }
+        }
+        _this.basicChaosForm.data = basicParam;
+      }
+    },
     openFullScreenLoading() {
       this.$loading.service({
         fullscreen: true,
-        spinner: "el-icon-loading",
-        text: "拼命加载中",
-        background: "rgba(0, 0, 0, 0.8)",
+        spinner: 'el-icon-loading',
+        text: '拼命加载中',
+        background: 'rgba(0, 0, 0, 0.8)'
       });
     },
     closeFullScreenLoading() {
-      let loadingInstance = this.$loading.service({ fullscreen: true });
+      const loadingInstance = this.$loading.service({ fullscreen: true });
       this.$nextTick(() => {
         // 以服务的方式调用的 Loading 需要异步关闭
         loadingInstance.close();
@@ -221,25 +292,25 @@ export default {
      */
     queryHostList: function () {
       var _this = this;
-      _this.$axios.get("/api/kv/chaos/node").then((res) => {
+      _this.$axios.get('/api/kv/chaos/node').then((res) => {
         // 由于现在查询出来是map结构,所以进行转换.把key转换为ID属性.
-        _this.hostList = _this.$util.arrayKv(res, "id");
+        _this.hostList = _this.$util.arrayKv(res, 'id');
       });
     },
     addHost: function () {
-      this.hostForm.type = "add";
+      this.hostForm.type = 'add';
       this.hostForm.visible = true;
     },
     editHost: function (item) {
       var _this = this;
       _this.hostForm.data = _this.$util.deepClone(item);
-      this.hostForm.type = "edit";
+      this.hostForm.type = 'edit';
       this.hostForm.visible = true;
     },
     saveHost: function () {
       // 校验
       var _this = this;
-      this.$refs["hostForm"].validate((valid) => {
+      this.$refs['hostForm'].validate((valid) => {
         if (valid) {
           // 添加遮罩
           _this.sendSaveRequest();
@@ -251,12 +322,24 @@ export default {
     sendSaveRequest: function () {
       var _this = this;
       var data = _this.hostForm.data;
+      var hostName = _this.hostForm.data.name;
+      for (const item of _this.hostList) {
+        if (data.id && item.name == hostName && data.id != item.id) {
+          // 修改的时候不能修改为其他节点存在的名称.
+          this.$message({
+            message: '主机名称:' + item.name + ',已经存在,不能添加!',
+            type: 'warning'
+          });
+          return false;
+        }
+      }
+
       _this.saveFn(
-        "/api/kv/chaos/node",
+        '/api/kv/chaos/node',
         data.id,
         _this.hostForm.type,
         data,
-        "保存主机成功!",
+        '保存主机成功!',
         () => {
           _this.hostForm.visible = false;
           _this.queryHostList();
@@ -266,8 +349,8 @@ export default {
     deleteHost: function (item) {
       var _this = this;
       _this.deleteFn(
-        "此操作将删除该主机,是否继续?",
-        "/api/kv/chaos/node/" + item.id,
+        '此操作将删除该主机,是否继续?',
+        '/api/kv/chaos/node/' + item.id,
         _this.queryHostList
       );
     },
@@ -279,7 +362,7 @@ export default {
         index: chaosIndex++,
         name: item.name,
         ip: item.ip,
-        type: "host",
+        type: 'host'
       };
     },
     /**
@@ -287,9 +370,9 @@ export default {
      */
     queryBlades: function () {
       var _this = this;
-      _this.$axios.get("/api/kv/chaos/blade").then((data) => {
+      _this.$axios.get('/api/kv/chaos/blade').then((data) => {
         if (data) {
-          _this.bladeList = _this.$util.arrayKv(data, "id");
+          _this.bladeList = _this.$util.arrayKv(data, 'id');
         }
       });
     },
@@ -310,11 +393,11 @@ export default {
       var _this = this;
       var data = _this.bladeForm.data;
       _this.saveFn(
-        "/api/kv/chaos/blade",
+        '/api/kv/chaos/blade',
         data.id,
         _this.bladeForm.type,
         data,
-        "保存基础实验成功!",
+        '保存基础实验成功!',
         () => {
           _this.bladeForm.visible = false;
           _this.queryBlades();
@@ -323,7 +406,7 @@ export default {
     },
     addBlade: function () {
       var _this = this;
-      _this.bladeForm.type = "add";
+      _this.bladeForm.type = 'add';
       _this.bladeForm.visible = true;
     },
     /**
@@ -338,25 +421,25 @@ export default {
     deleteBlade: function (item) {
       var _this = this;
       _this.deleteFn(
-        "此操作将永久删除该基础场景, 是否继续?",
-        "/api/kv/chaos/blade/" + item.id,
+        '此操作将永久删除该基础场景, 是否继续?',
+        '/api/kv/chaos/blade/' + item.id,
         _this.queryBlades
       );
     },
     saveFn: function (postUrl, id, type, data, msg, successFunction) {
       var _this = this;
       _this.openFullScreenLoading();
-      var method = "post";
+      var method = 'post';
       var url = postUrl;
-      if (type != "add") {
-        method = "put";
-        url = postUrl + "/" + id;
+      if (type !== 'add') {
+        method = 'put';
+        url = postUrl + '/' + id;
       }
       _this
         .$axios({
           method: method,
           url: url,
-          data: data,
+          data: data
         })
         .then(() => {
           _this.$message(msg);
@@ -369,24 +452,24 @@ export default {
     deleteFn: function (msg, url, queryFunction) {
       var _this = this;
       _this
-        .$confirm(msg, "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
+        .$confirm(msg, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
         .then(() => {
           _this.$axios.delete(url).then(() => {
             _this.$message({
-              type: "success",
-              message: "删除成功!",
+              type: 'success',
+              message: '删除成功!'
             });
             queryFunction();
           });
         })
         .catch(() => {
           _this.$message({
-            type: "info",
-            message: "已取消删除",
+            type: 'info',
+            message: '已取消删除'
           });
         });
     },
@@ -395,7 +478,7 @@ export default {
      */
     cloneBlade: function (item) {
       var newItem = this.$util.deepClone(item);
-      newItem.type = "blade";
+      newItem.type = 'blade';
       // 实验场景的唯一标识.
       newItem.index = chaosIndex++;
       return newItem;
@@ -409,15 +492,15 @@ export default {
       var relatedContext = evt.relatedContext;
       var contextList = relatedContext.list;
       if (!contextList || contextList.length == 0) {
-        _this.showMessage("请先添加主机节点");
+        _this.showMessage('请先添加主机节点');
         return false;
       } else if (contextList.length == 1 && contextList[0].virtual) {
         // 如果存在一个节点,但是为虚拟主机节点.
-        _this.showMessage("请先添加主机节点");
+        _this.showMessage('请先添加主机节点');
         return false;
       }
       if (evt.draggedContext.futureIndex == 0) {
-        this.showMessage("实验必须放置在主机下");
+        this.showMessage('实验必须放置在主机下');
         return false;
       }
     },
@@ -428,9 +511,9 @@ export default {
         _this.bladeDragNotiMessage = false;
         this.notiMessage = msg;
         _this.$message({
-          type: "warnning",
+          type: 'warnning',
           message: msg,
-          onClose: _this.resetMessage,
+          onClose: _this.resetMessage
         });
       }
     },
@@ -450,7 +533,7 @@ export default {
         var virutalNode;
         for (var i = 0; i < chaos.length; i++) {
           var item = chaos[i];
-          if (item && item.type == "host" && item.virtual) {
+          if (item && item.type == 'host' && item.virtual) {
             virutalNode = item;
             break;
           }
@@ -470,6 +553,7 @@ export default {
       if (!_this.chaosParams[item.index]) {
         _this.chaosParams[item.index] = {};
       }
+      _this.expDesc = item.desc;
       _this.chaosParam = _this.chaosParams[item.index];
     },
     /**
@@ -484,19 +568,20 @@ export default {
       var lastNode = {};
       //  记录不存在实验的主机.
       var notExistExpHost = [];
+      var notConfigExp = [];
       for (let i = 0; i < chaos.length; i++) {
-        let element = chaos[i];
+        const element = chaos[i];
         if (element.virtual) {
           this.$message({
-            message: "还未开始编排实验，请编排之后再保存!",
-            type: "warning",
+            message: '还未开始编排实验，请编排之后再保存!',
+            type: 'warning'
           });
           return;
         }
 
         if (_this.isHostNode(element.type)) {
           if (lastNode.type == element.type) {
-            //上一台主机过了就是主机.
+            // 上一台主机过了就是主机.
             notExistExpHost.push(lastNode.name);
             // 移除上一个节点.
             list.pop();
@@ -504,18 +589,23 @@ export default {
           // 添加新的节点.
           list.push({
             node: { ip: element.ip, name: element.name },
-            blades: [],
+            blades: []
           });
         } else {
           // 实验节点.
-          let hostNode = list[list.length - 1];
+          const hostNode = list[list.length - 1];
           // 需要读取配置.
-          let config = _this.$util.deepClone(element);
-          let params = _this.chaosParams[config.index];
-          delete config.index;
-          config.params.forEach((p) => {
-            p.value = params[p.id];
-          });
+          const config = _this.$util.deepClone(element);
+          const params = _this.chaosParams[config.index];
+          if (params) {
+            delete config.index;
+            config.params.forEach((p) => {
+              p.value = params[p.id];
+            });
+          } else {
+            notConfigExp.push(config.name);
+          }
+
           hostNode.blades.push(config);
         }
 
@@ -525,10 +615,19 @@ export default {
       if (notExistExpHost.length > 0) {
         this.$message({
           message:
-            "存在未配置实验的主机:" +
-            Array.toString(notExistExpHost) +
-            ",这些主机不会保存",
-          type: "warning",
+            '存在未配置实验的主机:[' +
+            notExistExpHost.join(',') +
+            '],将不会保存不存在实验的主机!',
+          type: 'warning'
+        });
+      }
+      if (notConfigExp.length > 0) {
+        this.$message({
+          message:
+            '存在实验[' +
+            notExistExpHost.join(',') +
+            ']属性未配置,请检查这些属性必填项是否都配置!',
+          type: 'warning'
         });
       }
       _this.chaosRecord = chaosRecord;
@@ -539,25 +638,24 @@ export default {
      */
     saveChaos: function () {
       var _this = this;
-      _this.$refs["basicChaosForm"].validate((valid) => {
+      _this.$refs['basicChaosForm'].validate((valid) => {
         if (valid) {
           var data = _this.chaosRecord;
           data.name = _this.basicChaosForm.data.name;
           data.desc = _this.basicChaosForm.data.desc;
+          data.id = _this.basicChaosForm.data.id;
           data.status = 0;
-          _this.openFullScreenLoading();
-          _this.$axios
-            .post("/api/kv/chaos/designer", data)
-            .then(() => {
-              _this.$message({
-                message: "保存成功",
-                type: "success",
-              });
+          _this.saveFn(
+            '/api/kv/chaos/designer',
+            data.id,
+            _this.type,
+            data,
+            '保存实验成功',
+            () => {
               _this.basicChaosForm.visible = false;
-            })
-            .finally(() => {
-              _this.closeFullScreenLoading();
-            });
+              _this.afterSaveChaos();
+            }
+          );
         } else {
           return false;
         }
@@ -570,26 +668,37 @@ export default {
       var _this = this;
       var index = item.index;
       var isHostNode = _this.isHostNode(item.type);
-      var type = isHostNode ? "主机" : "实验配置";
+      var type = isHostNode ? '主机' : '实验配置';
       // 删除之前的校验.
       var chaos = _this.chaosList;
-      var message = "此操作将删除" + type + ", 是否继续?";
+      var message = '此操作将删除' + type + ', 是否继续?';
       var deleteAll = false;
       if (isHostNode) {
         if (chaos.length > 1) {
           // 最后一个主机节点.不允许删除.
           var count = 0;
-          for (let index = 0; index < chaos.length; index++) {
-            const element = chaos[index];
+          for (let i = 0; i < chaos.length; i++) {
+            const element = chaos[i];
             if (_this.isHostNode(element.type)) {
               count++;
+            }
+            if (
+              i == 0 &&
+              index == element.index &&
+              !_this.isHostNode(chaos[i + 1].type)
+            ) {
+              _this.$message({
+                message: '第一个主机并且下面为实验节点不能删除!',
+                type: 'warning'
+              });
+              return false;
             }
             if (count == 2) {
               break;
             }
           }
           if (count == 1) {
-            message = "最后一个主机,删除主机将会删除所有配置,是否继续?";
+            message = '最后一个主机,删除主机将会删除所有配置,是否继续?';
             deleteAll = true;
           }
         } else {
@@ -598,19 +707,19 @@ export default {
       }
 
       _this
-        .$confirm(message, "提示", {
-          confirmButtonText: "确定",
-          cancelButtonText: "取消",
-          type: "warning",
+        .$confirm(message, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
         .then(() => {
           if (deleteAll) {
             _this.chaosList.splice(0);
             _this.chaosList.push({
-              id: "0",
-              type: "host",
-              name: "拖拽主机到这里",
-              virtual: true,
+              id: '0',
+              type: 'host',
+              name: '拖拽主机到这里',
+              virtual: true
             });
             _this.chaosParams = {};
             chaosIndex = 0;
@@ -628,21 +737,21 @@ export default {
           }
 
           _this.$message({
-            type: "success",
-            message: "删除" + type + "成功!",
+            type: 'success',
+            message: '删除' + type + '成功!'
           });
         })
         .catch(() => {
           _this.$message({
-            type: "info",
-            message: "已取消删除",
+            type: 'info',
+            message: '已取消删除'
           });
         });
     },
     isHostNode: function (type) {
-      return type == "host";
-    },
-  },
+      return type == 'host';
+    }
+  }
 };
 </script>
 
@@ -661,14 +770,13 @@ export default {
 }
 
 .list-group {
-  /* overflow: scroll;
-  overflow-x: hidden; */
   min-height: 20px;
 }
 
 .dragArea {
-  height: 500px;
+  height: 525px;
   background-color: #f5f5f5;
+  overflow-y: auto;
 }
 .list-group-item {
   border: 1px solid #ebeef5;
@@ -714,12 +822,21 @@ export default {
   font-size: 12px;
   line-height: 14px;
 }
-.param-panel {
-  float: right;
+.param-title {
+  font-weight: bold;
   margin-left: 5%;
-  max-height: 500px;
-  overflow: scroll;
-  overflow-x: hidden;
+  width: 92%;
+}
+.exist-param {
+  white-space: nowrap;
+  text-overflow: clip;
+  overflow: hidden;
+  margin-top: 0;
+}
+.param-panel {
+  width: 93%;
+  margin-left: 5%;
+  height: 475px;
 }
 .param-config {
   float: left;
@@ -727,7 +844,25 @@ export default {
 .param-item {
   margin: 3px 0.2%;
 }
+/* 覆盖的全局样式 */
+textarea {
+  font-family: 'auto';
+}
 .el-drawer.rtl {
-  overflow: scroll;
+  overflow-y: auto;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 6px;
+  background-color: #f5f5f5;
+}
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #f5f5f5;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+::-webkit-scrollbar-thumb {
+  background-color: #000000;
 }
 </style>

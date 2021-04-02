@@ -5,17 +5,17 @@
 </template>
 
 <script>
-import ChaosMgnt from "./components/ChaosMgnt.vue";
+import ChaosMgnt from './components/ChaosMgnt.vue';
 
 export default {
-  name: "app",
+  name: 'App',
   components: { ChaosMgnt }
 };
 </script>
 
 <style>
 #app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

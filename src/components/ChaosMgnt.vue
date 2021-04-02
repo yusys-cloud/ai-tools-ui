@@ -4,59 +4,63 @@
       <el-card>
         <div slot="header" class="card-header">
           <span>演练实验</span>
+          <el-button size="small" style="float: right" icon="el-icon-refresh" @click="queryChaos">刷新</el-button>
         </div>
         <div class="tool-bar">
-          <el-button @click="chaosDialog.visible = true" size="small">添加</el-button>
-          <el-button @click="batchExecChaosTask" size="small">执行</el-button>
+          <el-button size="small" @click="chaosDialog.visible = true">添加</el-button>
+          <el-button size="small" @click="batchExecChaosTask">执行</el-button>
         </div>
-        <el-autocomplete class="inline-input" v-model="chaosCondition" :fetch-suggestions="chaosFilter" placeholder="输入名称搜索实验" @select="selectChaosData" size="small"></el-autocomplete>
-        <el-table v-loading="loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" ref="chaosTable" :data="chaosList" max-height="500px" @selection-change="handleSelectionChange" :default-sort="{ prop: 'name', order: 'ascending' }">
-          <el-table-column type="selection" width="55"> </el-table-column>
-          <el-table-column label="实验名称" prop="name" width="200" sortable></el-table-column>
-          <el-table-column label="实验描述" prop="desc" width="300"></el-table-column>
+        <el-autocomplete v-model="chaosCondition" class="inline-input" :fetch-suggestions="chaosFilter" placeholder="输入名称搜索实验" size="small" @select="chaosDataSelected" />
+        <el-table ref="chaosTable" v-loading="loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="chaosList" max-height="500px" :default-sort="{ prop: 'name', order: 'ascending' }" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="55" />
+          <el-table-column label="实验名称" prop="name" width="200" sortable />
+          <el-table-column label="实验描述" prop="desc" width="300" />
           <el-table-column label="执行状态" sortable width="200">
             <template #default="scope">
-              <el-progress :text-inside="true" :stroke-width="26" :percentage="scope.row.status"></el-progress>
+              <el-progress :text-inside="true" :stroke-width="26" :percentage="scope.row.status" />
             </template>
           </el-table-column>
           <el-table-column label="主机列表">
             <template #default="scope">
-              <el-tag v-for="(item, index) in scope.row.chaos" size="medium" :key="item.node.name + index" style="margin-left: 8px">{{ item.node.name }}</el-tag>
+              <el-tag v-for="(item, index) in scope.row.chaos" :key="item.node.name + index" size="medium" style="margin-left: 8px">{{ item.node.name }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="操作" fixed="right" width="200px">
             <template #default="scope">
-              <el-button @click="execChaos(scope.row)" type="text" size="small">执行</el-button>
-              <el-button @click="editChaos(scope.row)" type="text" size="small">编辑</el-button>
-              <el-button @click="copyChaos(scope.row)" type="text" size="small">复制</el-button>
+              <el-button type="text" size="small" @click="execChaos(scope.row)">执行</el-button>
+              <el-button type="text" size="small" @click="editChaos(scope.row)">编辑</el-button>
+              <el-button type="text" size="small" @click="copyChaos(scope.row)">复制</el-button>
+              <el-button type="text" size="small" @click="deleteChaos(scope.row)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-card>
     </el-row>
-    <el-dialog class="chaosEditor" :visible.sync="chaosDialog.visible" title="演练场景编排" fullscreen :modal-append-to-body="false">
-      <chaosEditor />
+    <el-dialog class="chaosEditor" :visible.sync="chaosDialog.visible" title="演练场景编排" fullscreen>
+      <chaosEditor :chaos-data="selectChaosData" :type="chaosDialog.type" :after-save-chaos="afterSaveChaos" />
     </el-dialog>
   </div>
 </template>
 
 <script>
-import ChaosEditor from "./ChaosEditor.vue";
+import ChaosEditor from './ChaosEditor.vue';
 export default {
-  name: "ChaosMgnt",
+  name: 'ChaosMgnt',
   components: {
-    ChaosEditor,
+    ChaosEditor
   },
   data: function () {
     return {
       chaosList: [],
       loading: true,
       total: 0,
-      chaosCondition: "",
+      chaosCondition: '',
       selectedChaos: [],
       chaosDialog: {
         visible: false,
+        type: 'add'
       },
+      selectChaosData: {}
     };
   },
   created: function () {
@@ -73,10 +77,10 @@ export default {
     queryChaos: function () {
       var _this = this;
       _this.$axios
-        .get("/api/kv/chaos/designer")
+        .get('/api/kv/chaos/designer')
         .then((data) => {
           if (data) {
-            _this.chaosList = _this.$util.arrayKv(data, "id");
+            _this.chaosList = _this.$util.arrayKv(data, 'id');
           }
         })
         .finally(() => {
@@ -84,12 +88,12 @@ export default {
         });
     },
     chaosFilter: function (queryString, cb) {
-      //TODO
+      // TODO
       console.log(queryString + cb);
     },
-    selectChaosData: function (item) {
+    chaosDataSelected: function (item) {
       // TODO
-      console.log("选择数据" + item);
+      console.log('选择数据' + item);
     },
     /**
      * 执行任务.
@@ -98,28 +102,41 @@ export default {
       // 执行案例.
       var _this = this;
       // TODO 执行混乱测试.
-      _this.$message("执行测试案例!" + JSON.stringify(item));
+      _this.$message('执行测试案例!' + JSON.stringify(item));
     },
     batchExecChaosTask: function () {
       // 批量执行.
       // 执行案例.
       var _this = this;
       // TODO 执行批量混乱测试.
-      _this.$message("暂时未实现批量执行!");
+      _this.$message('暂时未实现批量执行!');
     },
     editChaos: function (item) {
-      //TODO 显示编辑面板.
       var _this = this;
-      console.log(item);
-      _this.$message("暂时未实现编辑!");
+      _this.selectChaosData = _this.$util.deepClone(item);
+      _this.chaosDialog.type = 'edit';
+      _this.chaosDialog.visible = true;
     },
     copyChaos: function (item) {
-      //TODO 显示编辑面板.
       var _this = this;
-      console.log(item);
-      _this.$message("暂时未实现复制!");
+      _this.selectChaosData = _this.$util.deepClone(item);
+      _this.selectChaosData.id = null;
+      _this.chaosDialog.type = 'add';
+      _this.chaosDialog.visible = true;
     },
-  },
+    afterSaveChaos: function () {
+      this.queryChaos();
+    },
+    deleteChaos: function (item) {
+      var _this = this;
+      _this.$util.deleteFn(
+        _this,
+        '操作将会删除编排好的混沌实验:' + item.name,
+        '/api/kv/chaos/designer/' + item.id,
+        _this.queryChaos
+      );
+    }
+  }
 };
 </script>
 
@@ -139,6 +156,6 @@ export default {
   margin-right: 50px;
 }
 .chaosEditor .el-dialog__body {
-    padding: 0;
+  padding: 0;
 }
 </style>
