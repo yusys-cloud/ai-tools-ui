@@ -60,7 +60,7 @@
         "id": "network-loss",
         "name": "网络丢包",
         "cmd": "blade create network loss",
-        "runResult": "",
+        "runResult": {reqUrl: "", respBody:""}
         "params": [
           {
             "id": "--percent",
