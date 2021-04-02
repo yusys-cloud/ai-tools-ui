@@ -5,7 +5,6 @@
 ``` 
 [
   {
-    "id": "node:1",
     "ip": "ip1",
     "name": "主中心-redis-node1"
   },
@@ -14,12 +13,6 @@
     "name": "主中心-redis-node1"
   }
 ]
-
-POST 
-{"data":{
-    "ip": "ip5",
-    "name": "主-redis-5"
-}}
 ```
 * 混沌实验列表 /api/kv/chaos/blade
 ``` 
@@ -38,6 +31,16 @@ POST
         "id": "--interface",
         "name": "网卡",
         "lable": "默认eth0"
+      }
+    ]
+  },
+  {
+    "name": "线程等待",
+    "cmd": "thread-wait",
+    "params": [
+      {
+        "name": "等待时间(秒)",
+        "lable": "60"
       }
     ]
   }
