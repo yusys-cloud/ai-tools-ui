@@ -49,36 +49,28 @@
 ```
 * 混沌实验场景编排 /api/kv/chaos/designer
 ```
-[
-  {
-    "node": {
-      "ip": "ip1",
-      "name": "主中心-redis-node1"
-    },
-    "blades": [
-      {
-        "id": "network-loss",
-        "name": "网络丢包",
-        "cmd": "blade create network loss",
-        "runResult": {reqUrl: "", respBody:""}
-        "params": [
-          {
-            "id": "--percent",
-            "name": "百分比",
-            "lable": "0-100",
-            "value": "60"
-          },
-          {
-            "id": "--interface",
-            "name": "网卡",
-            "lable": "默认eth0",
-            "value": "eth0"
-          }
-        ]
-      }
-    ]
-  }
-]
+{
+	"chaos": [{
+		"node": {
+			"ip": "172.18.87.69",
+			"name": "本地测试"
+		},
+		"blades": [{
+			"cmd": "blade create cpu load",
+			"desc": "CPU 相关的混沌实验包含 CPU 满载，可以指定核数、具体核满载或者总 CPU 负载百分比",
+			"id": "blade:1377544835698790400",
+			"name": "主机-CPU-负载",
+			"params": [{
+				"desc": "设定运行时长，单位是秒，通用参数",
+				"id": " --timeout",
+				"label": "3000",
+				"name": "运行时长",
+				"value": "3000"
+			}],
+	"name": "实验名称",
+	"desc": "实验描述",
+	"status": 0
+}
 
 ```
 
