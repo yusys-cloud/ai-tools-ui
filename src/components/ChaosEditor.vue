@@ -80,17 +80,17 @@
           <el-input v-model="bladeForm.data.name" autocomplete="off" clearable />
         </el-form-item>
         <el-form-item label="混沌测试描述" prop="desc">
-          <el-input v-model="bladeForm.data.desc" clearable />
+          <el-input v-model.trim="bladeForm.data.desc" clearable />
         </el-form-item>
         <el-form-item label="混沌测试命令" prop="cmd">
-          <el-input v-model="bladeForm.data.cmd" autocomplete="off" clearable />
+          <el-input v-model.trim="bladeForm.data.cmd" autocomplete="off" clearable />
         </el-form-item>
         <el-form-item v-for="(item, index) in bladeForm.data.params" :key="index" class="param-config" label-width="0">
-          <el-input v-model="item.name" class="param-item" style="width: 27%;" placeholder="参数中文名" autocomplete="off" clearable />
-          <el-input v-model="item.id" class="param-item" style="width: 27%;" placeholder="参数英文" clearable />
-          <el-input v-model="item.label" class="param-item" style="width: 27%;" placeholder="参数推荐值" />
+          <el-input v-model.trim="item.name" class="param-item" style="width: 27%;" placeholder="参数中文名" autocomplete="off" clearable />
+          <el-input v-model.trim="item.id" class="param-item" style="width: 27%;" placeholder="参数英文" clearable />
+          <el-input v-model.trim="item.label" class="param-item" style="width: 27%;" placeholder="参数推荐值" />
           <el-button class="param-item" style="width: 12%;" size="small" icon="el-icon-delete" @click.prevent="removeParam(index,item)">删除</el-button>
-          <el-input v-model="item.desc" type="textarea" :rows="1" class="param-item" style="width: 94%;margin-left:0.5%;" placeholder="参数描述" clearable :autosize="true" />
+          <el-input v-model.trim="item.desc" type="textarea" :rows="1" class="param-item" style="width: 94%;margin-left:0.5%;" placeholder="参数描述" clearable :autosize="true" />
         </el-form-item>
       </el-form>
       <div style="margin-bottom: 20px">

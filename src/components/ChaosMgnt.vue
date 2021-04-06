@@ -10,7 +10,7 @@
           <el-button size="small" @click="chaosDialog.visible = true">添加</el-button>
           <el-button size="small" @click="batchExecChaosTask">执行</el-button>
         </div>
-        <el-autocomplete v-model="chaosCondition" class="inline-input" :fetch-suggestions="chaosFilter" placeholder="输入名称搜索实验" size="small" @select="chaosDataSelected" />
+        <el-input v-model="chaosCondition" style="{float: right;width: 200px;}" placeholder="输入名称过滤实验" size="small" @input="chaosFilter" />
         <el-table ref="chaosTable" v-loading="loading" element-loading-text="拼命加载中" element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)" :data="chaosList" max-height="500px" :default-sort="{ prop: 'name', order: 'ascending' }" @selection-change="handleSelectionChange">
           <el-table-column type="selection" width="55" />
           <el-table-column label="实验名称" prop="name" width="200" sortable />
@@ -44,6 +44,7 @@
 
 <script>
 import ChaosEditor from './ChaosEditor.vue';
+const designApi = '/api/kv/chaos/designer/';
 export default {
   name: 'ChaosMgnt',
   components: {
@@ -52,6 +53,7 @@ export default {
   data: function () {
     return {
       chaosList: [],
+      allChaosList: [],
       loading: true,
       total: 0,
       chaosCondition: '',
@@ -77,23 +79,28 @@ export default {
     queryChaos: function () {
       var _this = this;
       _this.$axios
-        .get('/api/kv/chaos/designer')
+        .get(designApi)
         .then((data) => {
           if (data) {
-            _this.chaosList = _this.$util.arrayKv(data, 'id');
+            var array = _this.$util.arrayKv(data, 'id');
+            _this.chaosList = array;
+            // 不能使用赋值，使用clone.
+            _this.allChaosList = array.slice();
           }
         })
         .finally(() => {
           _this.loading = false;
         });
     },
-    chaosFilter: function (queryString, cb) {
-      // TODO
-      console.log(queryString + cb);
-    },
-    chaosDataSelected: function (item) {
-      // TODO
-      console.log('选择数据' + item);
+    chaosFilter: function (value) {
+      var _this = this;
+      if (!value) {
+        _this.chaosList = _this.allChaosList.slice();
+      } else {
+        _this.chaosList = _this.allChaosList.filter(
+          (chaos) => chaos.name.indexOf(value) > -1
+        );
+      }
     },
     /**
      * 执行任务.
@@ -101,8 +108,9 @@ export default {
     execChaos: function (item) {
       // 执行案例.
       var _this = this;
-      // TODO 执行混乱测试.
-      _this.$message('执行测试案例!' + JSON.stringify(item));
+      _this.$util.runFn(_this, designApi + 'run/' + item.id, () => {
+        _this.$message('执行混沌测试:[' + item.name + ']成功!');
+      });
     },
     batchExecChaosTask: function () {
       // 批量执行.
@@ -125,6 +133,7 @@ export default {
       _this.chaosDialog.visible = true;
     },
     afterSaveChaos: function () {
+      this.chaosDialog.visible = true;
       this.queryChaos();
     },
     deleteChaos: function (item) {
@@ -132,7 +141,7 @@ export default {
       _this.$util.deleteFn(
         _this,
         '操作将会删除编排好的混沌实验:' + item.name,
-        '/api/kv/chaos/designer/' + item.id,
+        designApi + item.id,
         _this.queryChaos
       );
     }

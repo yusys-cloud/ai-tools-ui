@@ -55,6 +55,14 @@ var Utils = {
           message: '已取消删除'
         });
       });
+  },
+  /**
+   *  调用运行的API.
+   */
+  runFn: function(_this, api, runSuccessCallback) {
+    _this.$axios.post(api).then(res => {
+      runSuccessCallback(res);
+    });
   }
 };
 export default Utils;

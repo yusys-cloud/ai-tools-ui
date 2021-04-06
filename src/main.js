@@ -12,7 +12,7 @@ Vue.prototype.$message = Message;
 Vue.prototype.$confirm = MessageBox;
 
 var axios = Axios.create({
-  baseURL: config.server.baseURL,
+  baseURL: config.server.baseURL ? config.server.baseURL : '',
   timeout: config.server.timeout
 });
 
