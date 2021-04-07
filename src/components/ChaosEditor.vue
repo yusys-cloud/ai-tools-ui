@@ -143,9 +143,7 @@ export default {
   props: {
     // 一个编排好的实验数据.
     chaosData: { type: Object, default: null },
-    type: { type: String, default: 'add' },
-    // eslint-disable-next-line vue/require-default-prop
-    afterSaveChaos: Function
+    type: { type: String, default: 'add' }
   },
   data: function () {
     return {
@@ -246,19 +244,21 @@ export default {
                   const blades = nodeChaos.blades;
                   blades.forEach((blade) => {
                     count++;
+                    // 追加cmd.
                     _this.chaosList.push({
                       id: blade.id,
                       index: count,
                       name: blade.name,
                       desc: blade.desc,
                       label: blade.label,
+                      cmd: blade.cmd,
                       params: blade.params
                     });
                     // 放入实验参数.
                     const params = blade.params;
-                    _this.chaosParams[index] = {};
+                    _this.chaosParams[count] = {};
                     params.forEach((p) => {
-                      _this.chaosParams[index][p.id] = p.value;
+                      _this.chaosParams[count][p.id] = p.value;
                     });
                   });
                 }
@@ -563,7 +563,7 @@ export default {
       var _this = this;
       var chaos = _this.chaosList;
       // 某些主机节点不存在实验.
-      var chaosRecord = { chaos: [] };
+      var chaosRecord = { total: 0, chaos: [] };
       var list = chaosRecord.chaos;
       var lastNode = {};
       //  记录不存在实验的主机.
@@ -605,7 +605,7 @@ export default {
           } else {
             notConfigExp.push(config.name);
           }
-
+          chaosRecord.total++;
           hostNode.blades.push(config);
         }
 
@@ -653,7 +653,8 @@ export default {
             '保存实验成功',
             () => {
               _this.basicChaosForm.visible = false;
-              _this.afterSaveChaos();
+              // 通知父组件保存成功.
+              _this.$emit('after-save-chaos');
             }
           );
         } else {

@@ -17,7 +17,7 @@
           <el-table-column label="实验描述" prop="desc" width="300" />
           <el-table-column label="执行状态" sortable width="200">
             <template #default="scope">
-              <el-progress :text-inside="true" :stroke-width="26" :percentage="scope.row.status" />
+              <el-progress :percentage="scope.row.status" />
             </template>
           </el-table-column>
           <el-table-column label="主机列表">
@@ -29,6 +29,7 @@
             <template #default="scope">
               <el-button type="text" size="small" @click="execChaos(scope.row)">执行</el-button>
               <el-button type="text" size="small" @click="editChaos(scope.row)">编辑</el-button>
+              <!-- TODO 添加清理已有的任务 -->
               <el-button type="text" size="small" @click="copyChaos(scope.row)">复制</el-button>
               <el-button type="text" size="small" @click="deleteChaos(scope.row)">删除</el-button>
             </template>
@@ -37,7 +38,7 @@
       </el-card>
     </el-row>
     <el-dialog class="chaosEditor" :visible.sync="chaosDialog.visible" title="演练场景编排" fullscreen>
-      <chaosEditor :chaos-data="selectChaosData" :type="chaosDialog.type" :after-save-chaos="afterSaveChaos" />
+      <chaosEditor :chaos-data="selectChaosData" :type="chaosDialog.type" @after-save-chaos="afterSaveChaos" />
     </el-dialog>
   </div>
 </template>
@@ -78,12 +79,17 @@ export default {
      */
     queryChaos: function () {
       var _this = this;
+      _this.loading = true;
       _this.$axios
         .get(designApi)
         .then((data) => {
           if (data) {
             var array = _this.$util.arrayKv(data, 'id');
             _this.chaosList = array;
+            // 不能使用赋值，使用clone.
+            _this.allChaosList = array.slice();
+          } else {
+            _this.chaosList = [];
             // 不能使用赋值，使用clone.
             _this.allChaosList = array.slice();
           }
@@ -108,8 +114,168 @@ export default {
     execChaos: function (item) {
       // 执行案例.
       var _this = this;
-      _this.$util.runFn(_this, designApi + 'run/' + item.id, () => {
-        _this.$message('执行混沌测试:[' + item.name + ']成功!');
+      console.log('执行实验:[' + item.name + ']');
+      var execTaskCount = 0;
+      var execResult = [];
+      item.status = 0;
+      item.chaos.forEach((element) => {
+        console.log('执行主机:[' + element.node.name + '] 实验');
+        _this.execTask(item, 0, 0, execTaskCount, execResult);
+      });
+    },
+    /**
+     * 执行某主机的某个实验.
+     */
+    execTask: function (item, nodeIndex, expIndex, execTaskCount, execResult) {
+      var _this = this;
+      const node = item.chaos[nodeIndex];
+      const total = item.total;
+      const exp = node.blades[expIndex];
+      var cmd = exp.cmd;
+      cmd = cmd.startsWith('blade ') ? cmd.substring(6) : cmd;
+      // 不同类型命令不一致.
+      var taskType;
+      if (cmd == 'destroy') {
+        //  销毁实验.
+        const taskId = execResult.pop();
+        cmd += ' ' + taskId;
+        taskType = 'D';
+      } else if (cmd == 'thread-wait') {
+        // 等待场景.
+        taskType = 'W';
+      } else {
+        // 创建实验或者prepare.
+        taskType = 'C';
+        var params = '';
+        exp.params.forEach((p) => {
+          if (p && p.value) {
+            params += ' ' + p.id + ' ' + p.value;
+          }
+        });
+
+        cmd = cmd + params;
+      }
+
+      console.log(
+        _this.$util.stringFormat(
+          '执行主机:[{0}],实验:{1},CMD:[{2}]',
+          node.node.ip,
+          exp.name,
+          exp.cmd
+        )
+      );
+
+      // 不同类型执行方式不一致.
+      if (taskType == 'W') {
+        // 执行等待.
+        var waitTime = node.blades[0].value;
+        if (waitTime) {
+          waitTime = 5;
+        }
+        setTimeout(
+          () =>
+            _this.execTaskSuccessCallback(
+              { code: 200, success: true, result: '' },
+              item,
+              nodeIndex,
+              expIndex,
+              taskType,
+              execTaskCount,
+              total,
+              execResult
+            ),
+          5 * 1000
+        );
+      } else {
+        cmd = cmd.replaceAll(' ', '%20');
+        cmd = 'http://' + node.node.ip + ':6666/chaosblade?cmd=' + cmd;
+        _this
+          .$axios({
+            url: '/api/http/do',
+            data: { url: cmd },
+            timeout: -1,
+            method: 'post'
+          })
+          .then((res) => {
+            _this.execTaskSuccessCallback(
+              res,
+              item,
+              nodeIndex,
+              expIndex,
+              taskType,
+              execTaskCount,
+              total,
+              execResult
+            );
+          })
+          .catch((error) => {
+            _this.$message({
+              message: _this.$util.stringFormat(
+                '实验[{0}]执行主机:{1}的 实验:{2},cmd:{3}异常:{4}',
+                item.name,
+                node.node.name,
+                exp.name,
+                exp.cmd,
+                error
+              ),
+              type: 'error'
+            });
+          });
+      }
+    },
+    execTaskSuccessCallback: function (
+      res,
+      item,
+      nodeIndex,
+      expIndex,
+      taskType,
+      execTaskCount,
+      total,
+      execResult
+    ) {
+      var _this = this;
+      const node = item.chaos[nodeIndex];
+      console.log(
+        _this.$util.stringFormat(
+          '执行状态:[{0}],是否成功:[{1}],实验编号:[{2}]',
+          res.code,
+          res.success,
+          JSON.stringify(res.result)
+        )
+      );
+      // 需要根据不同类型进行处理.
+      if (taskType != 'D' && taskType != 'W') {
+        execResult.push(res.result);
+      }
+
+      // 执行成功之后,更新状态.
+      // 根据总实验数进行添加100%比.
+      execTaskCount++;
+      if (execTaskCount == total) {
+        item.status = 100;
+      } else {
+        item.status += Math.round(100 / total);
+      }
+      _this.updateTaskStatus(item);
+      // 执行下一个节点.
+      // 如果是最后一个实验,叠加主机.
+      if (expIndex < node.blades.length - 1) {
+        expIndex++;
+      } else if (nodeIndex < item.chaos.length - 1) {
+        nodeIndex++;
+        expIndex = 0;
+      } else {
+        return;
+      }
+      _this.execTask(item, nodeIndex, expIndex, execTaskCount, execResult);
+    },
+    /**
+     * 更新任务的状态.
+     */
+    updateTaskStatus: function (item) {
+      var _this = this;
+      _this.$axios.put(designApi + item.id, item).finally(() => {
+        console.log('更新任务进度:' + item.status);
       });
     },
     batchExecChaosTask: function () {
@@ -133,7 +299,7 @@ export default {
       _this.chaosDialog.visible = true;
     },
     afterSaveChaos: function () {
-      this.chaosDialog.visible = true;
+      this.chaosDialog.visible = false;
       this.queryChaos();
     },
     deleteChaos: function (item) {
