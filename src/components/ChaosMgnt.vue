@@ -114,14 +114,32 @@ export default {
     execChaos: function (item) {
       // 执行案例.
       var _this = this;
-      console.log('执行实验:[' + item.name + ']');
-      var execTaskCount = 0;
-      var execResult = [];
-      item.status = 0;
-      item.chaos.forEach((element) => {
-        console.log('执行主机:[' + element.node.name + '] 实验');
-        _this.execTask(item, 0, 0, execTaskCount, execResult);
-      });
+      _this
+        .$confirm(
+          '此操作将开始执行混沌测试:[' + item.name + '], 是否继续?',
+          '提示',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+        .then(() => {
+          console.log('执行实验:[' + item.name + ']');
+          var execTaskCount = 0;
+          var execResult = [];
+          item.status = 0;
+          item.chaos.forEach((element) => {
+            console.log('执行主机:[' + element.node.name + '] 实验');
+            _this.execTask(item, 0, 0, execTaskCount, execResult);
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
     },
     /**
      * 执行某主机的某个实验.
@@ -134,25 +152,23 @@ export default {
       var cmd = exp.cmd;
       cmd = cmd.startsWith('blade ') ? cmd.substring(6) : cmd;
       // 不同类型命令不一致.
-      var taskType;
-      if (cmd == 'destroy') {
+      var taskType = exp.type;
+      // 容错处理一下.
+      if (!taskType) {
+        taskType = cmd == 'destroy' ? 'D' : cmd == 'thread-wait' ? 'W' : 'C';
+      }
+      if (taskType == 'D') {
         //  销毁实验.
         const taskId = execResult.pop();
         cmd += ' ' + taskId;
-        taskType = 'D';
-      } else if (cmd == 'thread-wait') {
-        // 等待场景.
-        taskType = 'W';
       } else {
         // 创建实验或者prepare.
-        taskType = 'C';
         var params = '';
         exp.params.forEach((p) => {
           if (p && p.value) {
             params += ' ' + p.id + ' ' + p.value;
           }
         });
-
         cmd = cmd + params;
       }
 
@@ -188,6 +204,7 @@ export default {
         );
       } else {
         cmd = cmd.replaceAll(' ', '%20');
+        // TODO 实现根据节点名称获取最新的主机IP.
         cmd = 'http://' + node.node.ip + ':6666/chaosblade?cmd=' + cmd;
         _this
           .$axios({

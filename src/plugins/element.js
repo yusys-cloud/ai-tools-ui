@@ -10,6 +10,8 @@ import {
   Form,
   FormItem,
   Input,
+  Select,
+  Option,
   Autocomplete,
   Table,
   TableColumn,
@@ -35,6 +37,8 @@ Vue.use(Button)
   .use(TableColumn)
   .use(Pagination)
   .use(Input)
+  .use(Select)
+  .use(Option)
   .use(Autocomplete)
   .use(Collapse)
   .use(CollapseItem)

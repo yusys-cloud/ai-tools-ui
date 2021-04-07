@@ -75,9 +75,14 @@
       </el-card>
     </el-col>
     <el-drawer :with-header="false" :visible.sync="bladeForm.visible" direction="rtl" size="45%" :wrapper-closable="false" :modal-append-to-body="false">
-      <el-form :model="bladeForm.data" :rules="bladeForm.rules" label-width="120px" size="small" width="90%" style="margin-top:30px">
+      <el-form :model="bladeForm.data" :rules="bladeForm.rules" label-width="120px" size="small" width="90%" style="margin-top:30px" inline>
         <el-form-item label="混沌测试名称" prop="name">
-          <el-input v-model="bladeForm.data.name" autocomplete="off" clearable />
+          <el-input v-model="bladeForm.data.name" clearable />
+        </el-form-item>
+        <el-form-item label="混沌测试类型" prop="type">
+          <el-select v-model="bladeForm.data.type" placeholder="请选择">
+            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="混沌测试描述" prop="desc">
           <el-input v-model.trim="bladeForm.data.desc" clearable />
@@ -113,8 +118,8 @@
         <el-button size="small" type="primary" @click="saveHost">保存</el-button>
       </div>
     </el-drawer>
-    <el-dialog title="保存实验" :visible.sync="basicChaosForm.visible" :modal-append-to-body="false">
-      <el-form ref="basicChaosForm" :model="basicChaosForm.data" :rules="basicChaosForm.rules" label-width="80px" size="small" width="100px">
+    <el-dialog title="保存实验" :visible.sync="basicChaosForm.visible" :modal-append-to-body="false" :center="true">
+      <el-form ref="basicChaosForm" :model="basicChaosForm.data" :rules="basicChaosForm.rules" label-width="80px" size="small">
         <el-form-item label="实验名称" prop="name">
           <el-input v-model="basicChaosForm.data.name" autocomplete="off" clearable />
         </el-form-item>
@@ -147,6 +152,11 @@ export default {
   },
   data: function () {
     return {
+      options: [
+        { label: '创建', value: 'C' },
+        { label: '等待', value: 'W' },
+        { label: '销毁', value: 'D' }
+      ],
       dragOptions: {
         animation: 0,
         group: 'chaos',
@@ -170,7 +180,7 @@ export default {
       bladeForm: {
         visible: false,
         type: 'add',
-        data: { params: [] },
+        data: { params: [], type: 'C' },
         rules: {
           name: [{ required: true, message: '请输入实验名称' }],
           cmd: [{ required: true, message: '请输入命令' }]
