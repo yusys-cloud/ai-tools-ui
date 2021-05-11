@@ -99,7 +99,7 @@ export default {
       })
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
-          kvCreate({bucket: 'snippets',key: this.demo.type,json: { "code": this.demo.code, "name": this.demo.name }}).then(() => {
+          kvCreate({bucket: 'snippets',key: this.demo.type,json: {"weight":"0","code": this.demo.code, "name": this.demo.name }}).then(() => {
             this.$notify({
               title: 'Success',
               message: 'Created Successfully',

@@ -51,7 +51,7 @@ export const constantRoutes = [
       path: 'dashboard',
       name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: 'Dashboard', icon: 'dashboard' }
+      meta: { title: 'Dashboard', icon: 'dashboard' ,affix: true}
     }]
   },
   {
@@ -63,8 +63,8 @@ export const constantRoutes = [
       {
         path: 'index',
         name: 'ssh',
-        component: () => import('@/views/table/ssh'),
-        meta: { title: 'SSH', icon: 'table' }
+        component: () => import('@/views/ssh/ssh2'),
+        meta: { title: 'SSH', icon: 'table' ,affix: true}
       }
     ]
   },
@@ -78,7 +78,7 @@ export const constantRoutes = [
         path: 'index',
         name: 'JSON',
         component: () => import('@/views/table/index'),
-        meta: { title: 'JSON', icon: 'form' }
+        meta: { title: 'JSON', icon: 'form' ,affix: true}
       }
     ]
   },

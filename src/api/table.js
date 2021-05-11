@@ -21,6 +21,12 @@ export function kvUpdate(p,id) {
     data: p.json
   })
 }
+export function kvUpdateWeight(p,id) {
+  return request({
+    url: '/api/kv/'+p.bucket+'/'+p.key+'/'+id+'/weight',
+    method: 'put'
+  })
+}
 
 export function kvDelete(p,id) {
   return request({
