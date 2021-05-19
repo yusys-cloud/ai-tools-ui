@@ -1,9 +1,8 @@
 <template>
-  <div class="console"
-       id="terminal"></div>
+  <div class="console" id="terminal"></div>
 </template>
 <script>
-import 'xterm/css/xterm.css'
+import 'xterm/css/xterm.css';
 import { Terminal } from 'xterm';
 export default {
   name: 'Console',
@@ -12,8 +11,7 @@ export default {
       type: Object,
       // eslint-disable-next-line vue/require-valid-default-prop
       default: {}
-    },
-    url: ''
+    }
   },
   data () {
     return {
@@ -39,8 +37,8 @@ export default {
     },
     // open websocket
     openWS(url){
-      this.url = url
-      this.terminalSocket = new WebSocket(this.url)
+      this.term.writeln('Connecting...')
+      this.terminalSocket = new WebSocket(url)
       this.terminalSocket.onopen = this.runRealTerminal
       this.terminalSocket.onclose = this.closeRealTerminal
       this.terminalSocket.onerror = this.errorRealTerminal
@@ -53,13 +51,13 @@ export default {
     let terminalContainer = document.getElementById('terminal')
     this.term = new Terminal()
     this.term.open(terminalContainer)
-    console.log(this.url)
     this.term._initialized = true
     console.log('mounted is going on')
-  },
-  beforeDestroy () {
-    this.terminalSocket.close()
-    this.term.destroy()
   }
+  // ,
+  // beforeDestroy () {
+  //   this.terminalSocket.close()
+  //   this.term.destroy()
+  // }
 }
 </script>
